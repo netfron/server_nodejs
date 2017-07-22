@@ -1,0 +1,21 @@
+{
+  "name": "server_nodejs",
+  "version": "1.0.0",
+  "description": "Nodejs server",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/netfron/server_nodejs.git"
+  },
+  "author": "dongsu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/netfron/server_nodejs/issues"
+  },
+  "homepage": "https://github.com/netfron/server_nodejs#readme"
+}
