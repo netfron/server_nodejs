@@ -1,41 +1,93 @@
-var createError = require('http-errors');
+/**
+ * Module dependencies.
+ */
+
 var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var path = require('path');
+var session = require('express-session');
+var methodOverride = require('method-override');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var app = module.exports = express();
 
-var app = express();
+// set our default template engine to "ejs"
+// which prevents the need for using file extensions
+app.set('view engine', 'ejs');
 
-// view engine setup
+// set views for error and 404 pages
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+// define a custom res.message() method
+// which stores messages in the session
+app.response.message = function(msg){
+  // reference `req.session` via the `this.req` reference
+  var sess = this.req.session;
+  // simply add the msg to an array for later
+  sess.messages = sess.messages || [];
+  sess.messages.push(msg);
+  return this;
+};
+
+// log
+if (!module.parent) app.use(logger('dev'));
+
+// serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// session support
+app.use(session({
+  resave: false, // don't save session if unmodified
+  saveUninitialized: false, // don't create session until something stored
+  secret: 'some secret here'
+}));
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+// parse request bodies (req.body)
+app.use(express.urlencoded({ extended: true }));
+
+// allow overriding methods in query (?_method=put)
+app.use(methodOverride('_method'));
+
+// expose the "messages" local variable when views are rendered
+app.use(function(req, res, next){
+  var msgs = req.session.messages || [];
+
+  // expose "messages" local variable
+  res.locals.messages = msgs;
+
+  // expose "hasMessages"
+  res.locals.hasMessages = !! msgs.length;
+
+  /* This is equivalent:
+   res.locals({
+     messages: msgs,
+     hasMessages: !! msgs.length
+   });
+  */
+
+  next();
+  // empty or "flush" the messages so they
+  // don't build up
+  req.session.messages = [];
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+// load controllers
+require('./lib/boot')(app, { verbose: !module.parent });
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+app.use(function(err, req, res, next){
+  // log it
+  if (!module.parent) console.error(err.stack);
+  console.error(err.stack);
+  // error page
+  res.status(500).render('5xx');
 });
 
-module.exports = app;
+// assume 404 since no middleware responded
+app.use(function(req, res, next){
+  res.status(404).render('404', { url: req.originalUrl });
+});
+
+/* istanbul ignore next */
+if (!module.parent) {
+  app.listen(3000);
+  console.log('Express started on port 3000');
+}
