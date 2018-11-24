@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "dev": "node ./bin/www && nodemon"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",
@@ -12,5 +13,18 @@
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
     "morgan": "~1.9.0"
-  }
+  },
+  "main": "index.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/netfron/server_nodejs.git"
+  },
+  "author": "dongsu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/netfron/server_nodejs/issues"
+  },
+  "homepage": "https://github.com/netfron/server_nodejs#readme",
+  "description": ""
 }
